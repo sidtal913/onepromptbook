@@ -7,7 +7,7 @@ export const runtime = "nodejs"
 export const maxDuration = 60
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY!
-const SUPABASE_URL = process.env.SUPABASE_SUPABASE_SUPABASE_SUPABASE_SUPABASE_NEXT_PUBLIC_SUPABASE_URL!
+const SUPABASE_URL = process.env.SUPABASE_SUPABASE_SUPABASE_SUPABASE_SUPABASE_SUPABASE_NEXT_PUBLIC_SUPABASE_URL!
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
 const BUCKET = "generated"
 
@@ -109,6 +109,20 @@ CRITICAL RULES - FOLLOW EXACTLY:
 5. Title must directly reflect what the user asked for
 6. Content must match the user's specific request, not generic content
 
+${
+  bookType === "story"
+    ? `
+FOR STORY BOOKS - CREATE ENGAGING NARRATIVE:
+- Each page should have engaging story text with dialogue and action
+- Use "bodyMd" field for the main story content (2-4 sentences per page)
+- Create a flowing narrative that progresses from page to page
+- Include character interactions, emotions, and exciting moments
+- End with a satisfying conclusion
+- NO technical instructions, tools, or steps - this is a STORY!
+`
+    : ""
+}
+
 Respond **only** in this JSON format:
 {
   "title": string (MUST reflect user's actual request),
@@ -143,8 +157,8 @@ Respond **only** in this JSON format:
       "funNote": string,`
           : bookType === "story"
             ? `
-      "title": string,
-      "bodyMd": string,`
+      "title": string (chapter/scene title),
+      "bodyMd": string (2-4 sentences of engaging story narrative with dialogue and action),`
             : bookType === "recipe"
               ? `
       "title": string,
@@ -176,6 +190,28 @@ CRITICAL INSTRUCTIONS:
 3. TITLE must reflect what they actually asked for
 4. CONTENT must match their specific themes, characters, and settings
 
+${
+  bookType === "story"
+    ? `
+FOR STORY BOOKS:
+- Create an engaging narrative that flows from page to page
+- Each page should advance the plot with 2-4 sentences of story text
+- Include dialogue, character emotions, and exciting moments
+- Build to a climactic moment and satisfying conclusion
+- Use vivid descriptions that match the user's requested theme
+- NO technical instructions or "how-to" content - this is pure storytelling!
+
+Example story page format:
+{
+  "pageNumber": 1,
+  "kind": "story",
+  "title": "The Journey Begins",
+  "bodyMd": "Captain Stella looked out at the twinkling stars and smiled. 'Today we're going to explore a brand new planet!' she announced to her crew. Navigator Nova checked the star maps while Engineer Orion prepared the rocket engines. The adventure was about to begin!"
+}
+`
+    : ""
+}
+
 Examples of CORRECT behavior:
 - User: "space adventure with astronauts" → Title: "Space Adventure with Astronauts" or "Journey to the Stars"
 - User: "alphabet coloring book A to Z" → Title: "Alphabet Coloring Book" with pages A, B, C... Z
@@ -184,6 +220,7 @@ Examples of CORRECT behavior:
 WRONG behavior (DO NOT DO):
 - User: "space adventure" → Title: "larry et jerry" (WRONG - doesn't match request)
 - User: "Niko the fox" → Title: "barry et larry" (WRONG - should be about Niko the fox)
+- Creating technical instructions instead of story narrative (WRONG for story books)
 
 Your task:
 - Create exactly ${pages} items in "pages" array
@@ -191,7 +228,7 @@ Your task:
 - Keep language kid/family-friendly
 - For "coloring": "imagePrompt" must describe LINE ART only (black outlines on white)
 - For alphabet books: use format like "A is for Apple", "B is for Bear", etc.
-- For "story": each page advances the plot based on user's request; end with closure
+- For "story": each page advances the plot with engaging narrative; end with closure
 - Title should be creative but MUST reflect the user's actual request: "${userPrompt}"`
 }
 
@@ -362,6 +399,10 @@ async function buildPdf(
         textBlocks.push("")
         textBlocks.push(`Note: ${page.nutritionNote}`)
       }
+    } else if (page.kind === "story") {
+      if (page.bodyMd) {
+        textBlocks.push(page.bodyMd.replace(/\n{3,}/g, "\n\n"))
+      }
     } else if (page.kind === "howto") {
       if (page.tools?.length) {
         textBlocks.push("Tools:")
@@ -376,7 +417,6 @@ async function buildPdf(
         page.proTips.forEach((t: string) => textBlocks.push(`– ${t}`))
       }
     } else {
-      // story/intro generic body
       if (page.bodyMd) textBlocks.push(page.bodyMd.replace(/\n{3,}/g, "\n\n"))
     }
 
