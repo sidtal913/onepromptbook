@@ -13,38 +13,21 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
-      console.log("[v0] NextAuth signIn for:", user.email)
-      return true
-    },
-    async jwt({ token, user, account }) {
-      if (user?.email) {
-        console.log("[v0] JWT callback for user:", user.email)
-        token.userId = user.email
-        token.role = "user"
-        token.organization = {
-          id: "default",
-          name: "Default Organization",
-          slug: "default",
-          plan: "free",
-        }
+    async jwt({ token, user }) {
+      if (user) {
+        token.userId = user.id
+        token.email = user.email
       }
       return token
     },
     async session({ session, token }) {
-      console.log("[v0] Session callback")
       if (token) {
         session.user.id = token.userId as string
-        session.user.role = token.role as string
-        session.user.organization = token.organization as any
       }
       return session
     },
   },
-  pages: {
-    signIn: "/auth/signin",
-  },
-  debug: false, // Disable debug to reduce noise
+  debug: false,
 }
 
 export const auth = () => getServerSession(authOptions)
