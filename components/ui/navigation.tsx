@@ -4,19 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { 
-  BookOpen, 
-  User, 
-  Menu, 
-  X, 
-  Sparkles, 
-  CreditCard,
-  Settings,
-  LogOut,
-  Home,
-  Gallery,
-  PlusCircle
-} from 'lucide-react'
+import { BookOpen, User, Menu, X, Sparkles, CreditCard, Settings, LogOut, Home, GalleryVertical as Gallery, PlusCircle } from 'lucide-react'
 import { supabase, getCurrentUser, signOut } from '@/lib/supabase'
 
 export function Navigation() {
