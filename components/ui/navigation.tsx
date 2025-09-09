@@ -48,7 +48,7 @@ export function Navigation() {
   const publicLinks = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/pricing', label: 'Pricing', icon: CreditCard },
-    { href: '/book-gallery', label: 'Gallery', icon: Gallery },
+    { href: '/book-gallery', label: 'Gallery', icon: GalleryVertical },
   ]
 
   const userLinks = [
